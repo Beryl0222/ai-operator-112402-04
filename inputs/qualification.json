@@ -1,0 +1,117 @@
+{
+  "gridUs": 125,
+  "sampleCount": 12288,
+  "kernelSize": 1024,
+  "packetFrames": 256,
+  "maxWorkBytes": 393216,
+  "maxContractionRatio": 0.38,
+  "slackUs": 16000,
+  "sources": {
+    "b": {
+      "originUs": 0,
+      "sampleUs": 100,
+      "quality": 3
+    },
+    "p": {
+      "originUs": 180000,
+      "sampleUs": 125,
+      "quality": 2
+    }
+  },
+  "channels": 4,
+  "phases": [
+    [
+      1,
+      0
+    ],
+    [
+      0.75,
+      0.25
+    ],
+    [
+      0.5,
+      0.5
+    ],
+    [
+      0.25,
+      0.75
+    ]
+  ],
+  "ramp": [
+    211000,
+    219000
+  ],
+  "events": [
+    [
+      "packet",
+      "b",
+      0,
+      8
+    ],
+    [
+      "packet",
+      "p",
+      0,
+      2
+    ],
+    [
+      "tick",
+      215000
+    ],
+    [
+      "missing",
+      "b",
+      2131
+    ],
+    [
+      "slice",
+      "b",
+      2048,
+      2131
+    ],
+    [
+      "slice",
+      "b",
+      2132,
+      2304
+    ],
+    [
+      "tick",
+      249000
+    ],
+    [
+      "packet",
+      "b",
+      9,
+      48
+    ],
+    [
+      "packet",
+      "p",
+      2,
+      48
+    ],
+    [
+      "tick",
+      1529000
+    ]
+  ],
+  "mix": [
+    [
+      0.5,
+      -0.25,
+      0.125,
+      0.5
+    ],
+    [
+      0.25,
+      0,
+      -0.125,
+      0.5
+    ]
+  ],
+  "bias": [
+    0,
+    0.125
+  ]
+}
