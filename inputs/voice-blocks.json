@@ -1,0 +1,122 @@
+{
+  "sampleRate": 16000,
+  "frames": 16384,
+  "block": 128,
+  "maxOrder": 32,
+  "workBytes": 32768,
+  "maxOpsPerSample": 220,
+  "switchOps": 8192,
+  "margin": 0.0005,
+  "handover": {
+    "physical": 8192,
+    "overlap": [
+      8128,
+      8192
+    ],
+    "scale": 0.5,
+    "epochMap": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        8128
+      ]
+    ]
+  },
+  "silence": [
+    [
+      7840,
+      8096
+    ],
+    [
+      12400,
+      12700
+    ]
+  ],
+  "coefficients": [
+    0.49,
+    -0.8,
+    0.95,
+    -0.9999,
+    0,
+    0.5
+  ],
+  "events": [
+    [
+      "open",
+      0,
+      32
+    ],
+    [
+      "play",
+      0,
+      [
+        7808,
+        8192
+      ]
+    ],
+    [
+      "switch",
+      0,
+      1,
+      8192
+    ],
+    [
+      "overlap",
+      1,
+      [
+        8128,
+        8192
+      ]
+    ],
+    [
+      "play",
+      1,
+      [
+        8192,
+        8448
+      ]
+    ],
+    [
+      "train",
+      1,
+      [
+        8128,
+        8320
+      ]
+    ],
+    [
+      "correct",
+      1,
+      [
+        8300,
+        8384
+      ]
+    ],
+    [
+      "history",
+      0,
+      [
+        8096,
+        8192
+      ]
+    ]
+  ],
+  "drive": {
+    "peak": 1.0,
+    "orderFloorEnergy": 0.0005,
+    "crossfade": [
+      8192,
+      8256
+    ],
+    "upstreamScale": 0.25
+  },
+  "fault": {
+    "epoch": 1,
+    "index": 8173,
+    "offset": 0.0625,
+    "reportedCopy": "later-correction"
+  }
+}

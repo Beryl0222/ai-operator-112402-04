@@ -1,15 +1,11 @@
-# 字幕端侧前端的断段分组时域卷积
+# 在线音色适配的稳定格型声道变换与伴随
 
-项目资料使用可独立读写的 JSON。Node.js 22.23.4 下运行 `npm ci --offline` 准备环境，然后运行 `npm run inspect` 检查合成数据字段，运行 `npm test` 校验样本引用及格式。
+这里的麦克风时钟和系数是用于设备联调的合成资料。使用 Node.js 22。运行 `npm ci --offline` 核对依赖锁，`npm run inspect` 查看资料字段，`npm test` 检查资料格式及相互引用。检视脚本只读取元数据。
 
-## 输入契约
+## 数据格式
 
-样本按 [帧][通道]，深度核每通道一组，tap 下标 0 对应当前样本，其余向过去按 dilation 取样，同段开始之前用 0。混合权重按 [输出][通道]，再加 bias，并施加 ReLU。卷积浮点参考绝对误差不超过 2e-5。时间用整数微秒，某段采样 i 的时间为 originUs+(i-start)*sampleUs。stride 格点满足 (i-start) mod stride=phase，结束索引是开区间。不可补采样以零代入同时传播缺失为元数据，正常输入采样为零不计缺失。设备预算包括尚未领取的输出及可丢弃的历史。 readDeadlineUs 到达时仍可重试读状态，但未曾声明不可补的采样不得默默按零合成。
+profile 包含采样率、最大阶数、反射系数开区间和稳定余量。lattice 使用 real 值分析/合成约定 A(z)=1+Σ a_k z^-k，反射系数按 Levinson 约定定义 a_k。离散训练损失为各输出采样乘对应 upstream 后求和，梯度对应已交付路径。设备处理量上限以 maxOpsPerSample 计浮点加乘，短暂切换允许接合窗额外预算 switchOps；内存以 workBytes 计。声道帧 key=[utterance,clockEpoch,physicalIndex]，同一物理 Index 的重叠在 epochMap 中明确，原始值由音频驱动正常承载。handover 声明切换点处的新幅标 scale 与允许使用真实过去样本的范围。重叠在两个驱动包不相符时先保持原已交付声道座标，新包中有争议样本不能成为训练正例。候选系数序列和静音段均由 voice-blocks.mjs 生成。 驱动按每 128 个规范采样批准一个系数向量。稳定上界为 |k_i|≤1−margin。只采用从 0 开始的连续前缀，第一个系数超界或该阶前的有权残余能量不足即停止。静音以 energy 门限判断，初始延时状态为零。跨麦校准后的两端首选复用本来等价的物理历史，不等价时准许在 crossfade 的双可用历史内交叉淡入，之后只用新链。输出峰值超限的片段不能直接播放。训练区由调用方给其实际播放版和同长度 upstream。 voiceSamples 可选择故障修订，第三项 true 注入新麦重叠里的重复但数值不相符。故障只覆盖那一次报告的物理位置。
 
-## 资料读取
+## 取数
 
-样本位于 `inputs/session.json`，其中 `events` 是按到达顺序记下的操作，编号从零开始。packet 以零基下标引用音频包。unrecoverable 的参数为段 ID、采样索引；close 用段 ID 指示段结束。
-
-## 设备联调资料
-
-`inputs/qualification.json` 是双源长输入。麦克风 `sampleUs` 和 `originUs` 以微秒给出，输出统一时钟 `gridUs`，前端先把各麦克风时钟上的输入转换到该时钟再做该源的因果深度卷积，最后按小样本约定做线性混合和 ReLU。重采样的 `phases` 按物理位置在前一个采样与下一个采样之间的分数乘表长度取整，所列权重依次作用于左邻点及右邻点。同源起点以前用零。`kernelSize`、`sample` 和 `tap` 提供有界的量化前数据，按 `packetFrames` 供给。`packet` 参数依次为源、包下标范围，`slice` 以采样下标半开区间补送原始点，`missing` 标记永久零替代，`tick` 触发当前时刻下可读格点。候选质量排序未过交接期优先旧源，交接期用 `ramp` 中的线性比例合成两个合法帧。驱动要求各格点在 `slackUs` 以内仍等待缺的优先源，之后只有已确定合法的源可作为兜底。若仍无合法源则向字幕端发出有具体原因的格点缺失，不携带卷积值。`maxContractionRatio` 与每阶段直接读每个非零 tap 的路径比较，精算和混合均按实际工作计，初次变换核的标量乘法也要计入。算子工作区包含内部历史、变换与尚未交付的帧。
+`inputs/voice-blocks.json` 保存标定、规格和调用记录。记录中的范围除明确说明外从零开始，使用半开区间。批量数组按调用记录列出的顺序交付。voiceSamples(page,epoch)、voiceCoefficients(page,epoch) 和 voiceLoss(page) 返回声道输入、参数和上游伴随。
